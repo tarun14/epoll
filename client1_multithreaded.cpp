@@ -43,12 +43,12 @@ int main()
     	//3. Transmit a message to another connected Socket
     	bytesSent = send(clientSock_fd, message, strlen(message), 0);
 
-   	if(bytesSent<0){
-       	    perror("Send call failed");
-   	}else{
-       	    std::cout<<"Message sent,bytes sent:"<<bytesSent<<"\n";
-   	}
-	std::this_thread::sleep_for(std::chrono::seconds(2));
+        if(bytesSent<0){
+                perror("Send call failed");
+        }else{
+                std::cout<<"Message sent,bytes sent:"<<bytesSent<<"\n";
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(2));
     }
 
     close(clientSock_fd);
