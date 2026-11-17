@@ -1,2 +1,2 @@
-This is epoll multithreading based multiclient server project.
+This is epoll multiclient server project.
 
