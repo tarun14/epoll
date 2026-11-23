@@ -21,6 +21,9 @@ class client{
         }
         client& operator=(client &&clref) noexcept{
             if(this != &clref){
+                if(clientSockfd >= 0){
+                    close(clientSockfd);
+                }
                 clientSockfd = std::move(clref.clientSockfd);
                 clref.clientSockfd = -1;
             }
@@ -45,6 +48,7 @@ int main()
     client cl(socket(AF_INET, SOCK_STREAM, 0));
     if(cl.clientSockfd < 0){
         std::cerr<<"Socket creation failed\n";
+        return 1;
     }
 
     sockaddr_in serverAddr;

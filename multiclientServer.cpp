@@ -36,6 +36,9 @@ class client{
         }
         client& operator=(client &&clref) noexcept{
             if(this != &clref){
+                if(clientSockfd >= 0){
+                    close(clientSockfd);
+                }
                 clientSockfd = std::move(clref.clientSockfd);
                 clref.clientSockfd = -1;
             }
@@ -156,10 +159,7 @@ int main()
                 // Accept connection from client
                 // Extracts the first connection request on the queue of 
                 // pending connections for the listening socket.
-                int clientSockfd=-1;
-                //client cl;
-                
-                clientSockfd = accept(srv.servSockfd, nullptr, nullptr);
+                int clientSockfd = accept(srv.servSockfd, nullptr, nullptr);
                 if(clientSockfd < 0){
                     if(clientSockfd == -1 && errno == EINTR){
                         std::cerr<<"User terminated, Exiting!!!\n";
@@ -168,22 +168,22 @@ int main()
                     std::cerr<<"accept failed!\n";
                     return 1;
                 };
-                //cl.clientSockfd = clientSockfd;
+                client accepted(clientSockfd);
                 //will create a new client and pass clientSockfd to its constructor
-                srv.clientSockfd.emplace_back(clientSockfd);
+                srv.clientSockfd.emplace_back(std::move(accepted));
 
                 //Create event for client socket
                 epoll_event client_ev{};
                 client_ev.events = EPOLLIN;
-                client_ev.data.fd = clientSockfd;
+                client_ev.data.fd = clientSockfd;//Update this to use srv based client
 
                 if(epoll_ctl(srv.epfd, EPOLL_CTL_ADD, clientSockfd, &client_ev) < 0){
                     std::cerr<<"epoll_ctl failed for adding clientSockfd\n";
+                    srv.clientSockfd.pop_back();
                     return 1;
                 }
             //Else: event(communication bytes) came for client
             }else{
-                //std::array<char,512>buf{};
                 char buf[512] = {0};
                 std::cout<<"Connection request for client\n";
                 int n = read(events[i].data.fd, buf, sizeof(buf));

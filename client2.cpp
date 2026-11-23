@@ -21,6 +21,9 @@ class client{
         }
         client& operator=(client &&clref) noexcept{
             if(this != &clref){
+                if(clientSockfd >= 0){
+                    close(clientSockfd);
+                }
                 clientSockfd = std::move(clref.clientSockfd);
                 clref.clientSockfd = -1;
             }
